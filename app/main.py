@@ -3,10 +3,10 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi import APIRouter
 
-from app.weather import WeatherTaskRunner  # todo RENAME!
+from app.weather import WeatherTaskRunner
 
 
-router = APIRouter()  # todo temp, for init only
+router = APIRouter()
 task_runner = WeatherTaskRunner()
 
 # todo temp

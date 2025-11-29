@@ -1,5 +1,6 @@
 import asyncio
 import aiohttp
+import os
 
 from typing import Any
 
@@ -35,8 +36,12 @@ class WeatherTaskRunner:  # todo rename
             # TODO do a err handling + retry mechanism
             raise e
 
-    def create_task(self):
-        task = 'placeholder'  # todo change
+    def create_task(self, city):
+        app_id = os.getenv("OpenWeather_APIKey")  # todo move
+
+        task = {
+            'url': f"https://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid={app_id}",
+        }
         self.tasks.append(task)
 
     def get_task_to_execute(self, max_tasks=1):
