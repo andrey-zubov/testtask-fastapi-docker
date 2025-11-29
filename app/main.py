@@ -1,15 +1,27 @@
 import uvicorn
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi import APIRouter  # todo temp
+
+from app.weather import WeatherTaskRunner  # todo RENAME!
 
 
 router = APIRouter()  # todo temp, for init only
+task_runner = WeatherTaskRunner()
 
 # todo temp
 @router.get("/weather/")
-async def get_weather():
-    return {"message": "Hello World"}
+async def get_weather(city: str):
+    if not city:
+        raise HTTPException(status_code=400, detail="City not provided")
+
+    # if data := get_cached_value(city):
+    #     return {"message": data}
+
+
+    data = await task_runner.execute_tasks()
+
+    return {"message": data}
 
 
 # todo add configuration
@@ -19,5 +31,7 @@ def create_app():
     return app
 
 
+# todo - for some reasons uvicorn > v0.35.0 is not able to run in debugger
 if __name__ == "__main__":
-    uvicorn.run("main:create_app", host="127.0.0.1", port=8000)
+    app = create_app()
+    uvicorn.run(app, host="127.0.0.1", port=8000)
