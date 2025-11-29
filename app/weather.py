@@ -7,25 +7,19 @@ class WeatherTaskRunner:  # todo rename
         self.tasks = []
         self.current_tasks = []
 
-        self.tasks.append({
-            'name': 'placeholder',
-            'url': 'https://example.com',
-        })
-
     async def execute_tasks(self):
-        if self.tasks:
+        result = []
+        while self.tasks:
             current_tasks = self.get_task_to_execute()
-            data = await self.gather_tasks(current_tasks)
-            return data
-        else:
-            pass
+            result += await self.gather_tasks(current_tasks)
+        return result
 
     async def gather_tasks(self, current_tasks):
         print('debug info')
         async with aiohttp.ClientSession() as session:
             asyncio_tasks = [asyncio.create_task(self.collect_data_from_api(task, session)) for task in current_tasks]
             results = await asyncio.gather(*asyncio_tasks)
-            return results
+        return results
 
     async def collect_data_from_api(self, task: dict, session: aiohttp.ClientSession):
         try:
@@ -49,7 +43,7 @@ class WeatherTaskRunner:  # todo rename
         :param max_tasks:
         :return:
         """
-        self.current_tasks = [self.tasks.pop()]  # todo ugly
+        self.current_tasks, self.tasks = self.tasks[:max_tasks], self.tasks[max_tasks:]
         return self.current_tasks
 
 
