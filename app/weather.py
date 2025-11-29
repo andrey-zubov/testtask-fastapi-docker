@@ -1,6 +1,8 @@
 import asyncio
 import aiohttp
 
+from typing import Any
+
 
 class WeatherTaskRunner:  # todo rename
     def __init__(self):
@@ -25,8 +27,8 @@ class WeatherTaskRunner:  # todo rename
         try:
             response = await session.get(task['url'])
             if response.ok:
-                data = await response.text()  # todo change for json
-                return data
+                data = await response.json()
+                return self.postprocess_data(data)
             else:
                 raise Exception('Some exception')
         except Exception as e:
@@ -46,5 +48,7 @@ class WeatherTaskRunner:  # todo rename
         self.current_tasks, self.tasks = self.tasks[:max_tasks], self.tasks[max_tasks:]
         return self.current_tasks
 
-
-
+    def postprocess_data(self, data: dict[str, Any]):
+        keys_to_keep = ['name', 'main', 'wind', 'clouds']
+        cleaned_data = {k: data.get(k) for k in keys_to_keep}
+        return cleaned_data
