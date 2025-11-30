@@ -19,9 +19,13 @@ async def get_weather(cities: str):
     #     return {"message": data}
     [task_runner.create_task(city) for city in cities.split(",")]
 
-    data = await task_runner.execute_tasks()
+    try:
+        data = await task_runner.execute_tasks()
+    except Exception as e:
+        print(e)  # todo traceback it and log
+        return str(e)
 
-    return {"message": data}
+    return data
 
 
 # todo add configuration

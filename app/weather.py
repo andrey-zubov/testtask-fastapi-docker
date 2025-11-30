@@ -1,8 +1,11 @@
 import asyncio
+import json
+
 import aiohttp
 import os
 
-from typing import Any
+from app.exceptions import InvalidCityException, UnauthorizedException, UnhandledException
+from app.utils import postprocess_data
 
 
 class WeatherTaskRunner:  # todo rename
@@ -25,21 +28,19 @@ class WeatherTaskRunner:  # todo rename
         return results
 
     async def collect_data_from_api(self, task: dict, session: aiohttp.ClientSession):
-        try:
-            response = await session.get(task['url'])
-            if response.ok:
-                data = await response.json()
-                return self.postprocess_data(data)
-            else:
-                raise Exception('Some exception')
-        except Exception as e:
-            # TODO do a err handling + retry mechanism
-            raise e
+        response = await session.get(task['url'])
+        if response.ok:
+            data = await response.json()
+            return postprocess_data(data)
+        else:
+            await self.postprocess_error(response, task)
+
 
     def create_task(self, city):
         app_id = os.getenv("OpenWeather_APIKey")  # todo move
 
         task = {
+            'city': city,
             'url': f"https://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid={app_id}",
         }
         self.tasks.append(task)
@@ -53,7 +54,18 @@ class WeatherTaskRunner:  # todo rename
         self.current_tasks, self.tasks = self.tasks[:max_tasks], self.tasks[max_tasks:]
         return self.current_tasks
 
-    def postprocess_data(self, data: dict[str, Any]):
-        keys_to_keep = ['name', 'main', 'wind', 'clouds']
-        cleaned_data = {k: data.get(k) for k in keys_to_keep}
-        return cleaned_data
+    async def postprocess_error(self, response: aiohttp.ClientResponse, task: dict):
+        try:
+            res = await response.json()
+            msg = res['message']
+        except json.decoder.JSONDecodeError:
+            msg = await response.text()
+
+        if response.status in (401, 403):
+            raise UnauthorizedException()
+        elif response.status == 404:
+            raise InvalidCityException(task['city'])
+        elif response.status == 500:
+            pass  # todo retry
+        else:
+            raise UnhandledException(msg)
