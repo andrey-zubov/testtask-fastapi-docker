@@ -1,5 +1,6 @@
 import asyncio
 import json
+import time
 
 import aiohttp
 import os
@@ -29,9 +30,10 @@ class WeatherTaskRunner:  # todo rename
 
     async def collect_data_from_api(self, task: dict, session: aiohttp.ClientSession):
         response = await session.get(task['url'])
+        task['timestamp'] = int(time.time())
         if response.ok:
             data = await response.json()
-            return postprocess_data(data)
+            return postprocess_data(data, task)
         else:
             await self.postprocess_error(response, task)
 

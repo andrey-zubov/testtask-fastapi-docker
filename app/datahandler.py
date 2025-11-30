@@ -1,7 +1,7 @@
 import os
 
 
-from typing import Union, Any
+from typing import Any
 
 
 class StorageData:
@@ -16,7 +16,7 @@ class StorageData:
             data = str(data)
 
         if self.storage == 'local':
-            with open('data/saved_data', 'w') as file:
+            with open(file_name, 'w') as file:
                 file.write(data + '\n')
         elif self.storage == 's3':
             pass
