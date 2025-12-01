@@ -1,10 +1,11 @@
 import uvicorn
+import traceback
 
 from fastapi import FastAPI, HTTPException
 from fastapi import APIRouter
 
 from app.weather import WeatherTaskRunner
-
+from app.weathercache import WeatherCache  # импортируем наш синглтон Cache
 
 router = APIRouter()
 
@@ -13,17 +14,15 @@ async def get_weather(cities: str):
     if not cities:
         raise HTTPException(status_code=400, detail="City not provided")
 
-    task_runner = WeatherTaskRunner()
+    task_runner = WeatherTaskRunner(WeatherCache())
 
-    # if data := get_cached_value(city):
-    #     return {"message": data}
     [task_runner.create_task(city) for city in cities.split(",")]
 
     try:
         data = await task_runner.execute_tasks()
     except Exception as e:
-        print(e)  # todo traceback it and log
-        return str(e)
+        traceback.print_exc(e)
+        return traceback.format_exc(e)
 
     return data
 

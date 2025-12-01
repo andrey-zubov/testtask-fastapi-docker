@@ -19,10 +19,14 @@ services:
   dynamodb-local:
     image: amazon/dynamodb-local:1.16.0
     container_name: dynamodb_local
-    environment:
-      DYNAMO_ENDPOINT: "http://dynamodb-local:8000"  # todo as env
-      AWS_ACCESS_KEY_ID: "local"
-      AWS_SECRET_ACCESS_KEY: "local"
+    env_file:
+      - .env
     ports:
       - "8001:8000"
     command: "-jar DynamoDBLocal.jar -sharedDb -inMemory"
+
+  redis:
+    image: redis
+    container_name: local_redis
+    ports:
+      - "6379:6379"

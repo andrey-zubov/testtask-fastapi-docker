@@ -1,18 +1,19 @@
 import asyncio
 import json
 import time
-
 import aiohttp
 import os
 
 from app.exceptions import InvalidCityException, UnauthorizedException, UnhandledException
 from app.utils import postprocess_response
+from app.weathercache import WeatherCache
 
 
-class WeatherTaskRunner:  # todo rename
-    def __init__(self):
+class WeatherTaskRunner:
+    def __init__(self, cache: WeatherCache):
         self.tasks = []
         self.current_tasks = []
+        self.cache = cache
 
     async def execute_tasks(self):
         result = []
@@ -22,21 +23,29 @@ class WeatherTaskRunner:  # todo rename
         return result
 
     async def gather_tasks(self, current_tasks):
-        print('debug info')
         async with aiohttp.ClientSession() as session:
-            asyncio_tasks = [asyncio.create_task(self.collect_data_from_api(task, session)) for task in current_tasks]
+            asyncio_tasks = [
+                asyncio.create_task(self.collect_data_from_api(task, session))
+                for task in current_tasks
+            ]
             results = await asyncio.gather(*asyncio_tasks)
         return results
 
     async def collect_data_from_api(self, task: dict, session: aiohttp.ClientSession):
-        response = await session.get(task['url'])
+        cached = await self.cache.get(key=task['city'])
+        if cached:
+            return cached
+
         task['timestamp'] = int(time.time())
+        response = await session.get(task['url'])
+
         if response.ok:
             data = await response.json()
-            return postprocess_response(data, task)
+            result = postprocess_response(data, task)
+            await self.cache.set(task['city'], result, ttl=300)
+            return result
         else:
             await self.postprocess_error(response, task)
-
 
     def create_task(self, city):
         app_id = os.getenv("OpenWeather_APIKey")  # todo move
@@ -48,11 +57,6 @@ class WeatherTaskRunner:  # todo rename
         self.tasks.append(task)
 
     def get_task_to_execute(self, max_tasks=1):
-        """
-        This is the buffer, to handle failed tasks.
-        :param max_tasks:
-        :return:
-        """
         self.current_tasks, self.tasks = self.tasks[:max_tasks], self.tasks[max_tasks:]
         return self.current_tasks
 
