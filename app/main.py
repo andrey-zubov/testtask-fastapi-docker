@@ -23,6 +23,7 @@ async def get_weather(cities: str):
         data = await task_runner.execute_tasks()
     except (UnauthorizedException, InvalidCityException) as e:
         print(str(e))
+        return {'ERROR': str(e)}
     except Exception as e:
         traceback.print_exc(e)
         return "Something went wrong."
