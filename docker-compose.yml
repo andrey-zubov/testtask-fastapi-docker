@@ -12,11 +12,17 @@ services:
       - .env
     ports:
       - "8000:8000"
+    depends_on:
+      - dynamodb-local
     command: ["uvicorn", "app.main:create_app", "--host", "0.0.0.0", "--port", "8000", "--factory"]
 
   dynamodb-local:
-    image: amazon/dynamodb-local:latest
+    image: amazon/dynamodb-local:1.16.0
     container_name: dynamodb_local
-    expose:
-      - 8000
+    environment:
+      DYNAMO_ENDPOINT: "http://dynamodb-local:8000"  # todo as env
+      AWS_ACCESS_KEY_ID: "local"
+      AWS_SECRET_ACCESS_KEY: "local"
+    ports:
+      - "8001:8000"
     command: "-jar DynamoDBLocal.jar -sharedDb -inMemory"

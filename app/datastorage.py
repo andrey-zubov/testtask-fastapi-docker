@@ -11,10 +11,8 @@ class StorageData:
         if self.storage == 's3':
             pass  # todo add s3 init with boto
 
-    def save_data(self, data: dict[str, Any], city: str, timestamp: int):
+    def save_data(self, data: dict[str, Any], city: str, file_name: str):
         data = str(data)
-
-        file_name = f'data/{city}_{timestamp}.json'
 
         if self.storage == 'local':
             with open(file_name, 'w') as file:

@@ -6,7 +6,7 @@ import aiohttp
 import os
 
 from app.exceptions import InvalidCityException, UnauthorizedException, UnhandledException
-from app.utils import postprocess_data
+from app.utils import postprocess_response
 
 
 class WeatherTaskRunner:  # todo rename
@@ -33,7 +33,7 @@ class WeatherTaskRunner:  # todo rename
         task['timestamp'] = int(time.time())
         if response.ok:
             data = await response.json()
-            return postprocess_data(data, task)
+            return postprocess_response(data, task)
         else:
             await self.postprocess_error(response, task)
 
