@@ -1,6 +1,6 @@
 from typing import Any
 
-from app.datahandler import StorageData
+from app.datastorage import StorageData
 
 
 storage = StorageData()
