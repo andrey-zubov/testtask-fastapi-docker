@@ -6,6 +6,7 @@ from fastapi import APIRouter
 
 from app.weather import WeatherTaskRunner
 from app.weathercache import WeatherCache  # импортируем наш синглтон Cache
+from app.exceptions import UnauthorizedException, InvalidCityException
 
 router = APIRouter()
 
@@ -20,9 +21,11 @@ async def get_weather(cities: str):
 
     try:
         data = await task_runner.execute_tasks()
+    except (UnauthorizedException, InvalidCityException) as e:
+        print(str(e))
     except Exception as e:
         traceback.print_exc(e)
-        return traceback.format_exc(e)
+        return "Something went wrong."
 
     return data
 
