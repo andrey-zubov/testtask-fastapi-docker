@@ -48,7 +48,7 @@ class WeatherTaskRunner:
             await self.postprocess_error(response, task)
 
     def create_task(self, city):
-        app_id = os.getenv("OpenWeather_APIKey")  # todo move
+        app_id = os.getenv("OPEN_WEATHER_API_KEY")  # todo move
 
         task = {
             'city': city,
