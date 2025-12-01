@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, MagicMock
 
-from app.log_utils import DBLogger
+from log_utils import DBLogger
 
 
 class TestLogUtils(unittest.TestCase):
