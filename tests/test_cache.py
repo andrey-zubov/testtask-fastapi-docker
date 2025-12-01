@@ -2,7 +2,7 @@ import unittest
 
 import pytest
 from unittest.mock import AsyncMock, patch
-from weathercache import WeatherCache
+from app.weathercache import WeatherCache
 
 
 class TestWeatherCache(unittest.TestCase):

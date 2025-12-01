@@ -2,8 +2,8 @@ import pytest
 import unittest
 from unittest.mock import AsyncMock, patch
 
-from weather import WeatherTaskRunner
-from weathercache import WeatherCache
+from app.weather import WeatherTaskRunner
+from app.weathercache import WeatherCache
 
 class TestWeather(unittest.TestCase):
     @pytest.mark.asyncio
