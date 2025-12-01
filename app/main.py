@@ -7,13 +7,13 @@ from app.weather import WeatherTaskRunner
 
 
 router = APIRouter()
-task_runner = WeatherTaskRunner()
 
-# todo temp
 @router.get("/weather/")
 async def get_weather(cities: str):
     if not cities:
         raise HTTPException(status_code=400, detail="City not provided")
+
+    task_runner = WeatherTaskRunner()
 
     # if data := get_cached_value(city):
     #     return {"message": data}
